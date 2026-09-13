@@ -10,7 +10,6 @@ var mainWorld = (function () {
       We = 480,
       Fe = "ofdl:wxt:user-status-request",
       be = "ofdl:wxt:user-status-response",
-      we = "TO_SUBSCRIBE",
       ve = "Title unavailable for PSWP download",
       K = ".b-post__wrapper",
       Y = ".b-chat__message__content",
@@ -103,24 +102,6 @@ var mainWorld = (function () {
       },
       se = (e, t) => {
         Z("replyInvokeTasks", { type: e, options: t });
-      },
-      Ye = () => {
-        se("alert", {
-          title: "Downloader",
-          message: "Upgrade to unlock HD downloads.",
-          html: !1,
-          hideCloseBtn: !1,
-          buttons: [{ text: "Upgrade Account", onclickEvent: we, closeOnClick: !0 }],
-        });
-      },
-      Qe = () => {
-        se("alert", {
-          title: "Downloader",
-          message: "Upgrade to unlock DRM downloads.",
-          html: !1,
-          hideCloseBtn: !1,
-          buttons: [{ text: "Upgrade Account", onclickEvent: we, closeOnClick: !0 }],
-        });
       },
       Ze = async () =>
         new Promise((e, t) => {
@@ -938,7 +919,7 @@ var mainWorld = (function () {
         }
         if (!s) {
           if (wt(e)) {
-            if ((Qe(), n)) {
+            if (n) {
               const r = n.getValue();
               n.setValue(r);
             }
@@ -948,7 +929,7 @@ var mainWorld = (function () {
             (o == null ? void 0 : o.key) === "origin" ||
             (typeof t == "number" && Number.isFinite(t) && t > We)
           ) {
-            if ((Ye(), n)) {
+            if (n) {
               const r = n.getValue();
               n.setValue(r);
             }

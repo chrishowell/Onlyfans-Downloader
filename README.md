@@ -3,8 +3,6 @@
     <h2>👋 Stable, Easy-to-use & Fast</h2>
 </div>
 
-![Onlyfans Downloader UI Banner](https://hlsdownloader.com/_next/image?url=%2Fscreenshot%2F1280-1024x640.png&w=1920&q=75)
-
 Onlyfans Downloader is the latest innovative tool designed for efficient and easy downloading of content from Onlyfans.
 
 ## ✨ Features
@@ -78,7 +76,6 @@ Onlyfans Downloader is the latest innovative tool designed for efficient and eas
 ### Manual Installation
 * <a href="https://github.com/mediadown/Onlyfans-Downloader/releases/latest" target="_blank">Download the extension</a> and unzip it to a folder.
 * Then go to the extension page manually or with url **chrome://extensions/** and turn on Developer Mode in the top right corner. In the new menu select "Load unpacked" and select the folder with the unzipped files.
-* Follow this link step to step.[How to Install Onlyfans Downloader Chrome Manually](https://hlsdownloader.com/how-to-manually-install-onlyfans-downloader/)
 ### Webstore
 * 🔴 EXTENSION GOT REMOVED FROM WEBSTORE "This functionality is not allowed per Chrome Web Store policies." 🔴
 

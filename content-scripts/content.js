@@ -5291,10 +5291,7 @@ var J3 = Object.defineProperty,
           },
           navigation: {
             openExternalUrl: "Navigation.OpenExternalUrl",
-            openHomeSite: "Navigation.OpenHomeSite",
             openApp: "Navigation.OpenApp",
-            openSubscription: "Navigation.OpenSubscription",
-            openSubscriptionManage: "Navigation.OpenSubscriptionManage",
           },
           siteAuth: { candidateReady: "SiteAuth.CandidateReady" },
           versionGate: {
@@ -41716,7 +41713,7 @@ Check the discardedTracks field for more info.`);
     }
     function qF(e) {
       return e === "DRM_BLOCKED_NON_MEMBER"
-        ? "Upgrade to unlock DRM downloads."
+        ? "DRM downloads are not available for this account."
         : e === "VIDEO_RESOLUTION_EXCEEDED"
           ? "Current account is limited to lower resolution videos."
           : e === "VIDEO_RESOLUTION_UNKNOWN"
@@ -42636,13 +42633,11 @@ Check the discardedTracks field for more info.`);
           })));
       });
     (Wt(), wc(), di(), hi(), _o(), Tc(), ko(), _c(), jf());
-    var i4 = "TO_SUBSCRIBE",
-      W_ = "__ofdlHandleDlRuntimeInjected",
+    var W_ = "__ofdlHandleDlRuntimeInjected",
       a4 = "data-ofdl-handle-dl-runtime-injected",
       s4 =
         "\u63D2\u4EF6\u5DF2\u66F4\u65B0\uFF0C\u8BF7\u5237\u65B0\u9875\u9762\u540E\u7EE7\u7EED\u4F7F\u7528\u3002",
       $_ = vo(qr.setting),
-      V_ = 0,
       Fd = fi(),
       Cy = !1,
       Ay = !1,
@@ -42661,10 +42656,6 @@ Check the discardedTracks field for more info.`);
     }
     function K_(e) {
       lr(e).catch(() => {});
-    }
-    function o4() {
-      const e = Date.now();
-      e - V_ < 1200 || ((V_ = e), K_({ command: tr.navigation.openSubscription }));
     }
     function Iy(e, t) {
       j_("replyInvokeTasks", { type: e, options: t });
@@ -42783,15 +42774,6 @@ Check the discardedTracks field for more info.`);
       };
       (window.addEventListener("invokeTasks", a),
         i.push(() => window.removeEventListener("invokeTasks", a)));
-      const s = (o) => {
-        const l = H_(o.detail);
-        l != null &&
-          l.type &&
-          (l.type === i4 && o4(),
-          l.type === "TO_HOMESITE" && K_({ command: tr.navigation.openHomeSite }));
-      };
-      (window.addEventListener("alertConfirm", s),
-        i.push(() => window.removeEventListener("alertConfirm", s)));
     }
     var i8 = "DailyPrompt.Show",
       a8 = "UpdatePrompt.Show",
@@ -42916,364 +42898,7 @@ Check the discardedTracks field for more info.`);
         }
       );
     }
-    var I4 = {
-        currency: "USD",
-        trialDays: 3,
-        defaultCycle: "yearly",
-        highlightTier: "MAX",
-        termsUrl: "https://hlsdownloader.com/privacy-policy",
-        paymentRedirectBase: "https://hlsdownloader.com/pay/redirect",
-        plans: {
-          PRO: {
-            label: "PRO",
-            description: "Do more with advanced intelligence",
-            cardBenefits: [
-              "3x speed vs Free baseline",
-              "Unlimited image & video export",
-              "DRM downloads supported",
-            ],
-            monthly: { priceId: "price_1MQsfML3M2iNid2EoMQ0wDq1", amount: 19.95, origin: 29.95 },
-            yearly: { priceId: "price_1MQsfML3M2iNid2EqoRq2XKk", amount: 149.95, origin: 199.95 },
-          },
-          MAX: {
-            label: "MAX",
-            description: "Maximize your productivity",
-            cardBenefits: [
-              "9x speed vs Free baseline (3x PRO)",
-              "Multi-creator, all-resource batch downloads",
-              "DRM downloads supported",
-            ],
-            monthly: { priceId: "price_1TPCnML3M2iNid2EuQm8a6NT", amount: 28.95, origin: 39.95 },
-            yearly: { priceId: "price_1TPCnaL3M2iNid2EJkKtolrZ", amount: 199.95, origin: 399.95 },
-          },
-        },
-        featureGroups: [
-          {
-            title: "Download Performance",
-            items: [
-              { name: "Media Source", free: "POST", pro: "One Of ALL", max: "ALL" },
-              { name: "Batch Mode", free: "Single", pro: "Single", max: "Multiple" },
-              {
-                name: "Download Efficiency",
-                free: "1x Baseline",
-                pro: "3x vs Free Baseline",
-                max: "3x vs Pro Baseline",
-              },
-              { name: "Site-Embedded Scripts", free: !0, pro: !0, max: !0 },
-            ],
-          },
-          {
-            title: "Export Capabilities",
-            items: [
-              { name: "Image Export", free: "<= 10", pro: "Unlimited", max: "Unlimited" },
-              { name: "Non-DRM Video Export", free: "<= 2", pro: "Unlimited", max: "Unlimited" },
-              { name: "Video Resolution", free: "<= 480p", pro: "HD", max: "HD" },
-              { name: "DRM Resources", free: !1, pro: !0, max: !0 },
-            ],
-          },
-          {
-            title: "Resource Filters",
-            items: [
-              { name: "File Size Filter", free: !1, pro: !0, max: !0 },
-              { name: "Date Filter", free: !1, pro: !0, max: !0 },
-              { name: "Resolution Filter", free: !1, pro: !0, max: !0 },
-            ],
-          },
-        ],
-        faq: [
-          {
-            q: "How does the free trial work?",
-            a: "Every paid plan starts with a 3-day free trial. You can cancel anytime before renewal.",
-          },
-          {
-            q: "Can I switch between PRO and MAX?",
-            a: "Yes. PRO users can upgrade to MAX from the subscription management page, then complete the change in Stripe Customer Portal.",
-          },
-          {
-            q: "What changes when I upgrade from PRO to MAX?",
-            a: "MAX unlocks multi-creator batch downloads, all media sources in one batch, and 3x PRO download efficiency for larger workflows.",
-          },
-          {
-            q: "How do I cancel?",
-            a: "You can cancel your subscription at any time from the subscription management page. Cancellation is completed in Stripe Customer Portal.",
-            action: { label: "Manage Subscription", to: "/subscription-manage" },
-          },
-        ],
-      },
-      En = I4;
-    function Z_(e, t) {
-      return En.plans[e][t];
-    }
-    var P4 = /(\bDRM\b|\b9x\b|\b3x\b|\b3-day trial\b|\bALL\b|\bMAX\b|\bPRO\b)/g;
-    function D4(e) {
-      return e
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-    }
-    function El(e) {
-      return D4(e).replace(P4, '<strong class="keyword-emphasis">$1</strong>');
-    }
-    function ex(e) {
-      return new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: En.currency,
-        minimumFractionDigits: e % 1 === 0 ? 0 : 2,
-        maximumFractionDigits: 2,
-      }).format(e);
-    }
-    function R4(e) {
-      const t = Z_(e.tier, e.cycle),
-        r = new URL(En.paymentRedirectBase);
-      return (
-        r.searchParams.set("priceId", t.priceId),
-        r.searchParams.set("email", e.email),
-        r.searchParams.set("token", e.token),
-        r.searchParams.set("extName", "Onlyfans"),
-        r.toString()
-      );
-    }
-    er();
-    var M4 = { class: "table-wrap" },
-      B4 = { class: "plan-table" },
-      F4 = { scope: "col", class: "plan-col-head" },
-      N4 = { class: "plan-col-head__content" },
-      O4 = { scope: "col", class: "plan-col-head" },
-      L4 = { class: "plan-col-head__content" },
-      U4 = { class: "feature-group-row" },
-      q4 = { scope: "rowgroup", class: "feature-group-title", colspan: "4" },
-      z4 = { scope: "row", class: "col-features" },
-      W4 = ["title"],
-      $4 = ["innerHTML"],
-      V4 = ["innerHTML"],
-      H4 = ["innerHTML"],
-      j4 = { class: "table-action-row" },
-      K4 = { class: "feature-value" },
-      G4 = { class: "feature-value" },
-      X4 = tn({
-        __name: "PlanComparisonTable",
-        props: { featureGroups: {}, variant: { default: "page" } },
-        emits: ["subscribe"],
-        setup(e) {
-          function t(a) {
-            if (typeof a == "boolean") return a ? "<span class='check-mark'>\u2713</span>" : "-";
-            const s = a.trim();
-            return s.toLowerCase() === "unlimited"
-              ? "<span class='unlimited-mark' aria-label='Unlimited'>\u2713</span>"
-              : s.toUpperCase() === "HD"
-                ? n()
-                : El(a);
-          }
-          function r(a) {
-            return typeof a == "boolean"
-              ? a
-                ? "feature-value positive"
-                : "feature-value negative"
-              : a.trim().toUpperCase() === "ALL" || a.trim().toUpperCase() === "MULTIPLE"
-                ? "feature-value accent"
-                : "feature-value";
-          }
-          function n() {
-            return `
-    <span class="hd-badge" aria-label="HD">
-      <span class="hd-badge__base">HD</span>
-      <sup class="hd-badge__plus" aria-hidden="true">+</sup>
-    </span>
-  `;
-          }
-          function i(a) {
-            return a === "Media Source"
-              ? "Types: POSTS, MESSAGES, ARCHIVED, STORIES, HIGHLIGHTS, PURCHASED, ALL."
-              : a === "Batch Mode"
-                ? "Single downloads one creator per batch. Multiple supports multi-creator batches."
-                : "";
-          }
-          return (a, s) => (
-            we(),
-            Te(
-              "section",
-              {
-                class: Et(["table-block", `table-block--${e.variant}`]),
-                "aria-label": "Plan comparison",
-              },
-              [
-                Z("div", M4, [
-                  Z("table", B4, [
-                    Z("thead", null, [
-                      Z("tr", null, [
-                        s[6] || (s[6] = Z("th", { scope: "col", class: "col-features" }, null, -1)),
-                        s[7] ||
-                          (s[7] = Z(
-                            "th",
-                            { scope: "col", class: "plan-col-head" },
-                            [
-                              Z("div", { class: "plan-col-head__content" }, [
-                                Z("span", null, "FREE"),
-                                Z(
-                                  "button",
-                                  {
-                                    type: "button",
-                                    class: "table-cta table-cta--current",
-                                    disabled: "",
-                                  },
-                                  " Current ",
-                                ),
-                              ]),
-                            ],
-                            -1,
-                          )),
-                        Z("th", F4, [
-                          Z("div", N4, [
-                            s[4] || (s[4] = Z("span", null, "PRO", -1)),
-                            Z(
-                              "button",
-                              {
-                                type: "button",
-                                class: "table-cta",
-                                onClick: s[0] || (s[0] = (o) => a.$emit("subscribe", "PRO")),
-                              },
-                              " GET PRO ",
-                            ),
-                          ]),
-                        ]),
-                        Z("th", O4, [
-                          Z("div", L4, [
-                            s[5] || (s[5] = Z("span", null, "MAX", -1)),
-                            Z(
-                              "button",
-                              {
-                                type: "button",
-                                class: "table-cta",
-                                onClick: s[1] || (s[1] = (o) => a.$emit("subscribe", "MAX")),
-                              },
-                              " GET MAX ",
-                            ),
-                          ]),
-                        ]),
-                      ]),
-                    ]),
-                    Z("tbody", null, [
-                      (we(!0),
-                      Te(
-                        kt,
-                        null,
-                        Mn(
-                          e.featureGroups,
-                          (o) => (
-                            we(),
-                            Te(
-                              kt,
-                              { key: o.title },
-                              [
-                                Z("tr", U4, [Z("th", q4, He(o.title), 1)]),
-                                (we(!0),
-                                Te(
-                                  kt,
-                                  null,
-                                  Mn(
-                                    o.items,
-                                    (l, c) => (
-                                      we(),
-                                      Te(
-                                        "tr",
-                                        {
-                                          key: `${o.title}-${l.name}`,
-                                          class: Et({ "is-group-last": c === o.items.length - 1 }),
-                                        },
-                                        [
-                                          Z("th", z4, [
-                                            Z("span", null, He(l.name), 1),
-                                            i(l.name)
-                                              ? (we(),
-                                                Te(
-                                                  "span",
-                                                  {
-                                                    key: 0,
-                                                    class: "feature-help",
-                                                    title: i(l.name),
-                                                  },
-                                                  "?",
-                                                  8,
-                                                  W4,
-                                                ))
-                                              : Ot("", !0),
-                                          ]),
-                                          Z(
-                                            "td",
-                                            { class: Et(r(l.free)), innerHTML: t(l.free) },
-                                            null,
-                                            10,
-                                            $4,
-                                          ),
-                                          Z(
-                                            "td",
-                                            { class: Et(r(l.pro)), innerHTML: t(l.pro) },
-                                            null,
-                                            10,
-                                            V4,
-                                          ),
-                                          Z(
-                                            "td",
-                                            { class: Et(r(l.max)), innerHTML: t(l.max) },
-                                            null,
-                                            10,
-                                            H4,
-                                          ),
-                                        ],
-                                        2,
-                                      )
-                                    ),
-                                  ),
-                                  128,
-                                )),
-                              ],
-                              64,
-                            )
-                          ),
-                        ),
-                        128,
-                      )),
-                    ]),
-                    Z("tfoot", null, [
-                      Z("tr", j4, [
-                        s[8] || (s[8] = Z("th", { scope: "row", class: "col-features" }, null, -1)),
-                        s[9] || (s[9] = Z("td", { class: "feature-value" }, null, -1)),
-                        Z("td", K4, [
-                          Z(
-                            "button",
-                            {
-                              type: "button",
-                              class: "table-cta table-cta--footer",
-                              onClick: s[2] || (s[2] = (o) => a.$emit("subscribe", "PRO")),
-                            },
-                            " GET PRO ",
-                          ),
-                        ]),
-                        Z("td", G4, [
-                          Z(
-                            "button",
-                            {
-                              type: "button",
-                              class: "table-cta table-cta--footer",
-                              onClick: s[3] || (s[3] = (o) => a.$emit("subscribe", "MAX")),
-                            },
-                            " GET MAX ",
-                          ),
-                        ]),
-                      ]),
-                    ]),
-                  ]),
-                ]),
-              ],
-              2,
-            )
-          );
-        },
-      }),
-      ai,
-      Pi = Q(() => {
+    var Pi = Q(() => {
         ai = (e, t) => {
           const r = e.__vccOpts || e;
           for (const [n, i] of t) r[n] = i;
@@ -43281,164 +42906,7 @@ Check the discardedTracks field for more info.`);
         };
       });
     Pi();
-    var Q4 = ai(X4, [["__scopeId", "data-v-3ca31db0"]]);
     er();
-    var Y4 = ["role", "tabindex", "onClick", "onKeydown"],
-      J4 = { class: "plan-card-head" },
-      Z4 = { class: "plan-title-row" },
-      eN = { key: 0, class: "plan-badge" },
-      tN = ["innerHTML"],
-      rN = { class: "plan-price-row" },
-      nN = { class: "plan-price" },
-      iN = { key: 0, class: "plan-billing-note" },
-      aN = { key: 1, class: "plan-billing-note" },
-      sN = { key: 0, class: "plan-benefits" },
-      oN = ["innerHTML"],
-      lN = ["innerHTML"],
-      cN = tn({
-        __name: "SubscriptionPlanCards",
-        props: {
-          cycle: {},
-          selectedTier: { default: void 0 },
-          variant: { default: "page" },
-          actionable: { type: Boolean, default: !0 },
-          compact: { type: Boolean, default: !1 },
-        },
-        emits: ["plan-click"],
-        setup(e, { emit: t }) {
-          const r = e,
-            n = t,
-            i = ["PRO", "MAX"],
-            a = Pe(() => {
-              const o = r.cycle === "yearly";
-              return i.map((l) => {
-                const c = En.plans[l],
-                  u = Z_(l, r.cycle);
-                return {
-                  tier: l,
-                  label: c.label,
-                  description: c.description,
-                  benefits: c.cardBenefits,
-                  isHighlighted: l === En.highlightTier,
-                  isSelected: l === r.selectedTier,
-                  displayAmount: o ? c.yearly.amount / 12 : u.amount,
-                  billedYearlyAmount: c.yearly.amount,
-                };
-              });
-            });
-          function s(o) {
-            r.actionable && n("plan-click", o);
-          }
-          return (o, l) => (
-            we(),
-            Te(
-              "section",
-              { class: Et(["plan-cards", `plan-cards--${e.variant}`]), "aria-label": "Paid plans" },
-              [
-                (we(!0),
-                Te(
-                  kt,
-                  null,
-                  Mn(
-                    a.value,
-                    (c) => (
-                      we(),
-                      Te(
-                        "article",
-                        {
-                          key: c.tier,
-                          class: Et([
-                            "plan-card",
-                            {
-                              selected: c.isSelected,
-                              highlighted: c.isHighlighted,
-                              "is-actionable": e.actionable,
-                            },
-                          ]),
-                          role: e.actionable ? "button" : void 0,
-                          tabindex: e.actionable ? 0 : void 0,
-                          onClick: (u) => s(c.tier),
-                          onKeydown: [
-                            mc(
-                              _t((u) => s(c.tier), ["prevent"]),
-                              ["enter"],
-                            ),
-                            mc(
-                              _t((u) => s(c.tier), ["prevent"]),
-                              ["space"],
-                            ),
-                          ],
-                        },
-                        [
-                          Z("div", J4, [
-                            Z("div", Z4, [
-                              Z("h2", null, He(c.label) + " Plan", 1),
-                              c.isHighlighted
-                                ? (we(), Te("span", eN, " Most popular "))
-                                : Ot("", !0),
-                            ]),
-                            Z("p", { innerHTML: st(El)(c.description) }, null, 8, tN),
-                          ]),
-                          Z("div", null, [
-                            Z("div", rN, [
-                              Z("p", nN, He(st(ex)(c.displayAmount)), 1),
-                              l[0] || (l[0] = Z("p", { class: "plan-period" }, "/ month", -1)),
-                            ]),
-                            e.cycle === "yearly"
-                              ? (we(),
-                                Te(
-                                  "p",
-                                  iN,
-                                  He(st(ex)(c.billedYearlyAmount)) + " billed yearly ",
-                                  1,
-                                ))
-                              : (we(), Te("p", aN, "billed monthly")),
-                          ]),
-                          e.compact
-                            ? Ot("", !0)
-                            : (we(),
-                              Te("ul", sN, [
-                                (we(!0),
-                                Te(
-                                  kt,
-                                  null,
-                                  Mn(
-                                    c.benefits,
-                                    (u) => (
-                                      we(),
-                                      Te("li", { key: u, innerHTML: st(El)(u) }, null, 8, oN)
-                                    ),
-                                  ),
-                                  128,
-                                )),
-                                c.tier === "MAX"
-                                  ? (we(),
-                                    Te(
-                                      "li",
-                                      { key: 0, innerHTML: st(El)("3-day trial included") },
-                                      null,
-                                      8,
-                                      lN,
-                                    ))
-                                  : Ot("", !0),
-                                l[1] || (l[1] = Z("li", null, "Cancel anytime", -1)),
-                              ])),
-                        ],
-                        42,
-                        Y4,
-                      )
-                    ),
-                  ),
-                  128,
-                )),
-              ],
-              2,
-            )
-          );
-        },
-      });
-    Pi();
-    var uN = ai(cN, [["__scopeId", "data-v-57b345ba"]]);
     async function tx(e, t = {}) {
       const r = await lr({
         command: tr.navigation.openExternalUrl,
@@ -44055,317 +43523,10 @@ Check the discardedTracks field for more info.`);
             },
           })));
       });
-    async function mx(e = {}, t = gx) {
-      const r = { entry: "app", ...e },
-        n = async () => {
-          const i = new URL(t);
-          Xa() && i.searchParams.set("crx_id", Xa());
-          for (const [a, s] of Object.entries(r))
-            s != null &&
-              i.searchParams.set(a, typeof s == "object" ? JSON.stringify(s) : String(s));
-          await tx(i.toString());
-        };
-      try {
-        return (await lr({ scope: yx, type: wx, payload: r }), !0);
-      } catch (i) {
-        return (await n(), !1);
-      }
-    }
-    var gx,
-      yx,
-      wx,
-      bx = Q(() => {
-        (Wt(),
-          rx(),
-          RN(),
-          (gx = "https://hlsdownloader.com/login"),
-          (yx = "web-auth"),
-          (wx = "TRIGGER"));
+    var bx = Q(() => {
+        (Wt(), rx(), RN());
       });
     (Wt(), rx(), bx(), Qa());
-    function Wd(e) {
-      return typeof e == "object" && e !== null;
-    }
-    function MN(e) {
-      return Wd(e)
-        ? e.source === "daily-prompt" &&
-            (e.tier === "PRO" || e.tier === "MAX") &&
-            (e.cycle === "monthly" || e.cycle === "yearly")
-        : !1;
-    }
-    function BN(e) {
-      if (!Wd(e)) return null;
-      const t = e.checkoutIntent;
-      return MN(t) ? t : null;
-    }
-    function FN(e) {
-      if (!Wd(e)) return null;
-      const t = typeof e.email == "string" ? e.email.trim() : "",
-        r = typeof e.token == "string" ? e.token.trim() : "";
-      return !t || !r ? null : { email: t, token: r };
-    }
-    async function NN() {
-      const e = await lr({ command: yf });
-      if (!(e != null && e.ok) || !e.snapshot) return null;
-      const { email: t, token: r } = e.snapshot.userState;
-      return !t || !r ? null : { email: t, token: r };
-    }
-    async function vx(e, t) {
-      await tx(R4({ ...e, email: t.email, token: t.token }));
-    }
-    async function ON(e) {
-      const t = await NN().catch(() => null);
-      if (t) {
-        await vx(e, t);
-        return;
-      }
-      await mx({ entry: "content", next: "/", checkoutIntent: e });
-    }
-    async function LN(e) {
-      const t = BN(e);
-      if (!t) return !1;
-      if (Wd(e) && e.status !== "success")
-        throw new Error(
-          typeof e.message == "string" && e.message.trim()
-            ? e.message
-            : "Authorization was not approved.",
-        );
-      const r = FN(e);
-      if (!r) throw new Error("Authorization response is missing credentials.");
-      return (await vx(t, r), !0);
-    }
-    (er(), Wt());
-    var UN = { class: "daily-prompt__panel" },
-      qN = { class: "daily-prompt__header" },
-      zN = { class: "daily-prompt__title-wrap" },
-      WN = ["src"],
-      $N = ["innerHTML"],
-      VN = { class: "daily-prompt__body" },
-      HN = { class: "daily-prompt__footer" },
-      jN = { key: 0, class: "daily-prompt__error" },
-      KN = ["disabled"],
-      GN = "web-auth",
-      XN = "ENTRY_RESULT",
-      QN = tn({
-        __name: "DailyPromptApp",
-        setup(e) {
-          const t = Ke(!1),
-            r = Ke(!1),
-            n = Ke(!1),
-            i = Ke("");
-          let a = null,
-            s = null;
-          const o = Pe(() => mf("/icon/icon-rect-48.png"));
-          function l(w) {
-            return typeof w == "object" && w !== null;
-          }
-          function c() {
-            r.value || ((i.value = ""), (t.value = !0));
-          }
-          function u() {
-            t.value = !1;
-          }
-          function d() {
-            ((r.value = !0), u());
-          }
-          function h(w) {
-            var v;
-            ((r.value = ((v = w.detail) == null ? void 0 : v.visible) === !0), r.value && u());
-          }
-          function f() {
-            if (s) return;
-            const w = document.documentElement,
-              v = document.body,
-              T = w.style.overflow,
-              A = v.style.overflow;
-            ((w.style.overflow = "hidden"),
-              (v.style.overflow = "hidden"),
-              (s = () => {
-                ((w.style.overflow = T), (v.style.overflow = A), (s = null));
-              }));
-          }
-          function p() {
-            s == null || s();
-          }
-          function g(w) {
-            return { source: "daily-prompt", tier: w, cycle: "monthly" };
-          }
-          async function y(w) {
-            if (!n.value) {
-              ((n.value = !0), (i.value = ""));
-              try {
-                (await ON(g(w)), u());
-              } catch (v) {
-                i.value = v instanceof Error ? v.message : "Failed to open checkout.";
-              } finally {
-                n.value = !1;
-              }
-            }
-          }
-          function m(w) {
-            l(w) &&
-              (w.scope !== GN ||
-                w.type !== XN ||
-                LN(l(w.payload) ? w.payload : {})
-                  .then((v) => {
-                    v && u();
-                  })
-                  .catch((v) => {
-                    ((t.value = !0),
-                      (i.value = v instanceof Error ? v.message : "Failed to open checkout."));
-                  }));
-          }
-          return (
-            Wa(() => {
-              (window.addEventListener(Py, c),
-                window.addEventListener(Sl, d),
-                window.addEventListener(Dy, h),
-                (a = wo(m)));
-            }),
-            Lr(t, (w) => {
-              if (w) {
-                f();
-                return;
-              }
-              p();
-            }),
-            Wi(() => {
-              (window.removeEventListener(Py, c),
-                window.removeEventListener(Sl, d),
-                window.removeEventListener(Dy, h),
-                a == null || a(),
-                (a = null),
-                p());
-            }),
-            (w, v) =>
-              t.value
-                ? (we(),
-                  Te(
-                    "div",
-                    {
-                      key: 0,
-                      class: "daily-prompt",
-                      role: "dialog",
-                      "aria-modal": "true",
-                      "aria-labelledby": "ofdl-daily-prompt-title",
-                      onClick: _t(u, ["self"]),
-                    },
-                    [
-                      Z("div", UN, [
-                        Z("header", qN, [
-                          Z("div", zN, [
-                            Z(
-                              "img",
-                              { class: "daily-prompt__icon", src: o.value, alt: "" },
-                              null,
-                              8,
-                              WN,
-                            ),
-                            Z("div", null, [
-                              v[1] ||
-                                (v[1] = Z(
-                                  "h2",
-                                  { id: "ofdl-daily-prompt-title" },
-                                  "Unlock more OnlyFans downloads",
-                                  -1,
-                                )),
-                              Z(
-                                "p",
-                                {
-                                  innerHTML: st(El)(
-                                    `Paid plans include a ${st(En).trialDays}-day trial and higher download limits.`,
-                                  ),
-                                },
-                                null,
-                                8,
-                                $N,
-                              ),
-                            ]),
-                          ]),
-                          Z(
-                            "button",
-                            {
-                              type: "button",
-                              class: "daily-prompt__close",
-                              "aria-label": "Close",
-                              onClick: u,
-                            },
-                            [
-                              ...(v[2] ||
-                                (v[2] = [
-                                  Z(
-                                    "svg",
-                                    { viewBox: "0 0 24 24", "aria-hidden": "true" },
-                                    [
-                                      Z("path", {
-                                        d: "M18 6 6 18M6 6l12 12",
-                                        fill: "none",
-                                        stroke: "currentColor",
-                                        "stroke-linecap": "round",
-                                        "stroke-linejoin": "round",
-                                        "stroke-width": "2",
-                                      }),
-                                    ],
-                                    -1,
-                                  ),
-                                ])),
-                            ],
-                          ),
-                        ]),
-                        Z("main", VN, [
-                          Lt(
-                            uN,
-                            {
-                              cycle: "monthly",
-                              "selected-tier": st(En).highlightTier,
-                              variant: "prompt",
-                              compact: "",
-                              onPlanClick: y,
-                            },
-                            null,
-                            8,
-                            ["selected-tier"],
-                          ),
-                          Lt(
-                            Q4,
-                            {
-                              "feature-groups": st(En).featureGroups,
-                              variant: "prompt",
-                              onSubscribe: y,
-                            },
-                            null,
-                            8,
-                            ["feature-groups"],
-                          ),
-                        ]),
-                        Z("footer", HN, [
-                          i.value ? (we(), Te("p", jN, He(i.value), 1)) : Ot("", !0),
-                          Z(
-                            "button",
-                            {
-                              type: "button",
-                              class: "daily-prompt__primary",
-                              disabled: n.value,
-                              onClick: v[0] || (v[0] = (T) => y(st(En).highlightTier)),
-                            },
-                            He(
-                              n.value
-                                ? "Opening checkout..."
-                                : `Start ${st(En).trialDays}-day trial`,
-                            ),
-                            9,
-                            KN,
-                          ),
-                        ]),
-                      ]),
-                    ],
-                  ))
-                : Ot("", !0)
-          );
-        },
-      });
-    Pi();
-    var YN = ai(QN, [["__scopeId", "data-v-77888783"]]);
     (er(), Wt());
     var JN = { class: "update-prompt__panel" },
       ZN = { class: "update-prompt__header" },
@@ -45438,10 +44599,8 @@ Check the discardedTracks field for more info.`);
           (nC = tn({
             __name: "UserStatusButton",
             props: { memberType: {}, memberTime: {} },
-            emits: ["manage"],
-            setup(e, { emit: t }) {
+            setup(e) {
               const r = e,
-                n = t,
                 i = Ke(null),
                 a = Ke(!1),
                 s = Pe(() =>
@@ -45464,9 +44623,6 @@ Check the discardedTracks field for more info.`);
                 }));
               function d() {
                 a.value = !a.value;
-              }
-              function h() {
-                ((a.value = !1), n("manage"));
               }
               return (f, p) => (
                 we(),
@@ -45516,23 +44672,6 @@ Check the discardedTracks field for more info.`);
                       ],
                       2,
                     ),
-                    o.value
-                      ? (we(),
-                        Te(
-                          "button",
-                          {
-                            key: 0,
-                            type: "button",
-                            class: Et([
-                              "sidebar-user-status-manage-btn",
-                              { "is-visible": a.value },
-                            ]),
-                            onClick: _t(h, ["stop", "prevent"]),
-                          },
-                          " MANAGE ",
-                          2,
-                        ))
-                      : Ot("", !0),
                   ],
                   2,
                 )
@@ -45818,9 +44957,6 @@ Check the discardedTracks field for more info.`);
                   n.value = { ...t };
                 }
               }
-              async function J() {
-                (await mx({ entry: "content", next: "/" }), await K());
-              }
               function H() {
                 try {
                   ((u = pf({ name: wf })),
@@ -45841,9 +44977,6 @@ Check the discardedTracks field for more info.`);
                 } finally {
                   ((d = null), (h = null), (u = null));
                 }
-              }
-              async function G() {
-                await lr({ command: tr.navigation.openSubscriptionManage }).catch(() => {});
               }
               function X(C) {
                 return ye(C) && (ue(C) || Ne(C));
@@ -46105,50 +45238,12 @@ Check the discardedTracks field for more info.`);
                                         key: 0,
                                         "member-type": n.value.memberType,
                                         "member-time": n.value.memberTime,
-                                        onManage: G,
                                       },
                                       null,
                                       8,
                                       ["member-type", "member-time"],
                                     ))
-                                  : (we(),
-                                    Te(
-                                      "button",
-                                      {
-                                        key: 1,
-                                        class: "of-side-sign-in-button",
-                                        type: "button",
-                                        onClick: J,
-                                      },
-                                      [
-                                        ...($[10] ||
-                                          ($[10] = [
-                                            Z(
-                                              "svg",
-                                              {
-                                                class: "of-side-sign-in-button__icon",
-                                                viewBox: "0 0 24 24",
-                                                fill: "none",
-                                                stroke: "currentColor",
-                                                "stroke-width": "2",
-                                                "stroke-linecap": "round",
-                                                "stroke-linejoin": "round",
-                                                focusable: "false",
-                                                "aria-hidden": "true",
-                                              },
-                                              [
-                                                Z("path", {
-                                                  d: "M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4",
-                                                }),
-                                                Z("path", { d: "m10 17 5-5-5-5" }),
-                                                Z("path", { d: "M15 12H3" }),
-                                              ],
-                                              -1,
-                                            ),
-                                            Z("span", null, "Sign In", -1),
-                                          ])),
-                                      ],
-                                    )),
+                                  : Ot("", !0),
                               ]),
                               Z("nav", dC, [
                                 (we(!0),
@@ -46585,7 +45680,7 @@ Check the discardedTracks field for more info.`);
         }
       `,
             onMount(u) {
-              const d = af({ render: () => Ih(kt, [Ih(YN), Ih(gO)]) });
+              const d = af({ render: () => Ih(kt, [Ih(gO)]) });
               return (d.mount(u), d);
             },
             onRemove(u) {

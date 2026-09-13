@@ -831,10 +831,7 @@ var Bt = class extends Error {
     },
     navigation: {
       openExternalUrl: "Navigation.OpenExternalUrl",
-      openHomeSite: "Navigation.OpenHomeSite",
       openApp: "Navigation.OpenApp",
-      openSubscription: "Navigation.OpenSubscription",
-      openSubscriptionManage: "Navigation.OpenSubscriptionManage",
     },
     siteAuth: { candidateReady: "SiteAuth.CandidateReady" },
     versionGate: {
@@ -1255,26 +1252,11 @@ function wr() {
 function vr(e) {
   return e === "browser.storage.sync" ? "sync" : "local";
 }
-var gr = new Set(["subscribe_upgrade_page", "subscription_manage_page"]);
 function br(e) {
-  return (
-    e === "Login" ||
-    e === "subscribe_page" ||
-    e === "unsubscribe_page" ||
-    e === "ActiveUse" ||
-    /^OpenPayment_\d+(?:\.\d+)?$/.test(e)
-  );
-}
-function _r(e) {
-  return gr.has(e) || /^OpenUpgrade_\d+(?:\.\d+)?$/.test(e);
+  return e === "Login" || e === "ActiveUse";
 }
 function Ar(e) {
-  return e === "unsubscribe_button";
-}
-function Sr(e) {
-  if (!e.startsWith("OpenPayment_")) return null;
-  const t = Number(e.slice(12));
-  return Number.isFinite(t) ? t : null;
+  return !1;
 }
 function kr() {
   return (typeof navigator < "u" ? navigator.userAgent.toLowerCase() : "").includes("firefox");
@@ -2151,9 +2133,6 @@ function sn(e, t) {
 function cn(e) {
   return oe("Login", {}, e);
 }
-function un(e, t) {
-  return oe("OpenPayment", { amount: e, currency: "USD", payment_method: "stripe" }, t);
-}
 function ln(e) {
   G({ command: R.analytics.report, payload: e }).catch((t) => {});
 }
@@ -2161,11 +2140,10 @@ async function fn(e) {
   return e.kind === "app" ? dn(e.email, e.event) : hn(e.email, e.name, e.data);
 }
 async function dn(e, t) {
-  if (!br(t)) return (_r(t), !1);
+  if (!br(t)) return !1;
   if (t === "ActiveUse") return sn("Export", e);
   if (t === "Login") return cn(e);
-  const r = Sr(t);
-  return r !== null ? un(r, e) : Le({ email: e, name: t });
+  return Le({ email: e, name: t });
 }
 async function hn(e, t, r) {
   return Ar(t) ? Le({ email: e, name: yn(t), data: r }) : !1;
@@ -2213,8 +2191,7 @@ function pn(e, t) {
     updatedAt: Date.now(),
   };
 }
-var mn = "https://r2.hlsdownloader.com/crx/updates.json",
-  wn = 10080 * 60 * 1e3,
+var wn = 10080 * 60 * 1e3,
   ie = null;
 Ue(D.versionGate, (e) => {
   var t;
@@ -2297,33 +2274,8 @@ async function _e(e) {
   return (await B(D.versionGate, t), t);
 }
 async function _n(e) {
-  const t = Je(J()),
-    r = H(),
-    s = (await e(`${mn}?t=${Date.now()}`)).find((K) => Je(K.id) === t);
-  if (!s) return _e(ze());
-  const p = ge(r.version || "0.0.0"),
-    y = String(s.version || "").trim(),
-    A = String(s.betaVersion || "").trim(),
-    k = ge(y),
-    C = ge(A),
-    M = k.length > 0 && be(p, k),
-    S = String(s.download_url || "").trim().length > 0,
-    b =
-      k.length > 0 && C.length > 0 && !be(k, C)
-        ? "VERSION_GATE_CONFIG_INVALID: betaVersion must be greater than version."
-        : void 0;
-  return _e({
-    status: C.length > 0 && be(p, C) ? "functional" : "blocked",
-    product: s,
-    hasUpdate: M,
-    latestVersion: y,
-    latestBetaVersion: A,
-    updateSource: M && S ? "manual" : "none",
-    updateAction: M && S ? "download" : "none",
-    storeUpdateVersion: void 0,
-    storeUpdateCheckedAt: void 0,
-    configError: b,
-  });
+  // Remote version gate removed: the extension is always functional.
+  return _e(vn());
 }
 async function An(e) {
   return (

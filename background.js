@@ -398,507 +398,7 @@ function Ta() {
     },
   };
 }
-var Xt = "https://hlsdownloader.com/login",
-  Da = "web-auth-app-window",
-  Ua = ["https://hlsdownloader.com", "https://www.hlsdownloader.com", "http://localhost:3000"],
-  xa = "hlsdownloader-website",
-  Ca = "AUTH_CALLBACK",
-  zt = "/",
-  x = "web-auth",
-  Jt = "TRIGGER",
-  Ce = "WINDOW_READY",
-  Le = "CALLBACK",
-  Zt = "USER_UPDATE",
-  ct = "EXTERNAL_CALLBACK",
-  Pe = "REQUEST_NAVIGATION",
-  La = "NAVIGATE",
-  Oe = "NAVIGATED",
-  Pa = "ENTRY_RESULT",
-  te = "IDLE",
-  Oa = 1920,
-  Na = 1080,
-  It = "/subscribe?from=content",
-  Ha = new Set([Jt, Ce, Pe, Oe, ct]),
-  B = null,
-  K = null;
-function H(t) {
-  return typeof t == "object" && t !== null;
-}
-function Ne(t) {
-  return H(t) && t.scope === x && typeof t.type == "string" && Ha.has(t.type);
-}
-function He(t, e, n) {
-  return H(t) && t.source === e && t.type === n;
-}
-function $(t, e) {
-  if (typeof t != "string") return e;
-  const n = t.trim();
-  return !n ||
-    n.startsWith("moz-extension://") ||
-    n.startsWith("chrome-extension://") ||
-    n.startsWith("http://") ||
-    n.startsWith("https://")
-    ? e
-    : n.startsWith("#")
-      ? $(n.slice(1), e)
-      : n.startsWith("/")
-        ? n
-        : n.startsWith("?")
-          ? `/${n}`
-          : `/${n}`;
-}
-function $e(t) {
-  const [e] = t.split(/[?#]/, 1);
-  return e || zt;
-}
-function $a(t, e) {
-  if (t == null || t === e) return !0;
-  const n = $e(t),
-    a = $e(e);
-  return n === "/subscribe-upgrade" && a === "/subscribe";
-}
-function Fa(t, e) {
-  var n;
-  const a = H(t.payload) ? t.payload : {};
-  return $((n = t.next) != null ? n : a.next, e);
-}
-function Fe(t) {
-  return t === "content" ? "content" : "app";
-}
-function Va(t) {
-  return t === "PRO" || t === "MAX";
-}
-function Ve(t) {
-  const e = t == null ? void 0 : t.checkoutIntent;
-  return !!e && typeof e == "object";
-}
-function qa(t) {
-  var e, n, a, r;
-  const o = $((e = t.payload) == null ? void 0 : e.returnTo, t.fallback),
-    l = $((n = t.payload) == null ? void 0 : n.subscribeRoute, t.fallback),
-    w = ((a = t.payload) == null ? void 0 : a.targetTier) === "MAX" ? "MAX" : "PRO";
-  return t.memberType === "FREE"
-    ? l
-    : t.memberType === "PRO" && w === "MAX"
-      ? $((r = t.payload) == null ? void 0 : r.upgradeRoute, "/subscribe-upgrade")
-      : o;
-}
-function Wa(t, e, n = Xt) {
-  const a = new URL(n);
-  t && a.searchParams.set("crx_id", t);
-  for (const [r, o] of Object.entries(e || {}))
-    if (!(o == null || r === "crx_id")) {
-      if (Array.isArray(o)) {
-        for (const l of o) a.searchParams.append(r, String(l != null ? l : "").trim());
-        continue;
-      }
-      if (typeof o == "object") {
-        a.searchParams.set(r, JSON.stringify(o));
-        continue;
-      }
-      a.searchParams.set(r, String(o));
-    }
-  return a.toString();
-}
-async function qe(t, e = {}) {
-  var n, a, r;
-  const o = (n = e.loginUrl) != null ? n : Xt,
-    l = (a = e.defaultRoute) != null ? a : zt,
-    w = H(t) ? { ...t } : {},
-    I = $(w.next, l);
-  w.next = I;
-  const S = Fe(w.entry);
-  ((K = {
-    entry: S,
-    next: I,
-    appWindow: S === "app" && B != null ? B : void 0,
-    contentTab: S === "content" ? { tabId: e.senderTabId, windowId: e.senderWindowId } : void 0,
-  }),
-    await ee(I));
-  const A = Wa(ye(), w, o);
-  (e.focusExisting !== !1 && (await Qa(A))) ||
-    (await ut((r = (await qt({ url: A, active: !0 })).windowId) != null ? r : void 0));
-}
-function Ga(t, e) {
-  if (!t) return !1;
-  try {
-    const n = new URL(t),
-      a = new URL(e);
-    return n.origin === a.origin && n.pathname === a.pathname;
-  } catch (n) {
-    return !1;
-  }
-}
-async function ee(t) {
-  if (t != null && t.trim()) {
-    await rt(M.webAuthNext, t.trim());
-    return;
-  }
-  await Pt(M.webAuthNext);
-}
-async function We() {
-  const t = await Vt(M.webAuthNext);
-  return typeof t == "string" ? t : void 0;
-}
-async function ne() {
-  await Pt(M.webAuthNext);
-}
-function et(t) {
-  B = t ? { ...t } : null;
-}
-function ja(t) {
-  var e, n, a, r;
-  return {
-    windowId: (n = (e = t.sender) == null ? void 0 : e.tab) == null ? void 0 : n.windowId,
-    tabId: (r = (a = t.sender) == null ? void 0 : a.tab) == null ? void 0 : r.id,
-  };
-}
-async function Ge() {
-  var t;
-  if (!B) return null;
-  const e = B.tabId;
-  if (typeof e == "number")
-    try {
-      const [a] = await X({ windowId: B.windowId, active: !0 });
-      if ((a == null ? void 0 : a.id) === e) {
-        const r = { windowId: (t = a.windowId) != null ? t : B.windowId, tabId: e };
-        return (et(r), r);
-      }
-    } catch (a) {}
-  const n = B.windowId;
-  if (typeof n == "number")
-    try {
-      const a = (await X({ windowId: n })).find((r) => typeof r.id == "number");
-      if ((a == null ? void 0 : a.id) != null) {
-        const r = { windowId: n, tabId: a.id };
-        return (et(r), r);
-      }
-    } catch (a) {}
-  return (et(null), null);
-}
-async function Ba() {
-  var t, e;
-  try {
-    const n = (await ke()).find((o) => o.isPrimary),
-      a = (t = n == null ? void 0 : n.workArea) == null ? void 0 : t.width,
-      r = (e = n == null ? void 0 : n.workArea) == null ? void 0 : e.height;
-    if (typeof a == "number" && typeof r == "number" && a > 0 && r > 0)
-      return { width: a, height: r };
-  } catch (n) {}
-  return { width: Oa, height: Na };
-}
-async function Ka(t) {
-  var e, n, a, r;
-  const o = await Ba(),
-    l = Math.ceil(o.width * 0.74),
-    w = Math.ceil(o.height * 0.8),
-    I = Math.ceil((o.width - l) / 2),
-    S = Math.ceil((o.height - w) / 2),
-    A = (e = st().browser_specific_settings) != null && e.gecko ? "popup" : "panel",
-    b = await mt({ url: V(t), type: A, focused: !0, width: l, height: w, left: I, top: S });
-  et({
-    windowId: (n = b.id) != null ? n : void 0,
-    tabId: (r = (a = b.tabs) == null ? void 0 : a[0]) == null ? void 0 : r.id,
-  });
-}
-async function ae(t, e, n) {
-  const a = $(t, n),
-    r = V(`${e}#${a}`),
-    o = await Ge();
-  if ((o == null ? void 0 : o.tabId) != null)
-    try {
-      (await G(o.tabId, { url: r, active: !0 }),
-        typeof o.windowId == "number" && (await Q(o.windowId, { focused: !0 })));
-      return;
-    } catch (l) {}
-  await Ka(`${e}#${a}`);
-}
-async function Ya() {
-  return Ge();
-}
-async function ut(t) {
-  if (typeof t == "number")
-    try {
-      await Q(t, { focused: !0 });
-    } catch (e) {}
-}
-async function je(t) {
-  var e;
-  if (typeof (t == null ? void 0 : t.tabId) != "number") return !1;
-  try {
-    const n = await ot(t.tabId);
-    return (
-      await G(t.tabId, { active: !0 }),
-      await ut((e = n.windowId) != null ? e : t.windowId),
-      !0
-    );
-  } catch (n) {
-    return !1;
-  }
-}
-async function Qa(t) {
-  var e;
-  try {
-    const n = (await X({})).find((a) => Ga(a.url, t) && typeof a.id == "number");
-    return n != null && n.id
-      ? (await G(n.id, { url: t, active: !0 }), await ut((e = n.windowId) != null ? e : void 0), !0)
-      : !1;
-  } catch (n) {
-    return !1;
-  }
-}
-async function Xa(t, e) {
-  try {
-    return (await $t(t, e), !0);
-  } catch (n) {
-    return !1;
-  }
-}
-async function za(t, e) {
-  if (typeof (t == null ? void 0 : t.tabId) != "number") return !1;
-  await je(t);
-  const n = await Xa(t.tabId, { scope: x, type: Pa, payload: e });
-  return (await je(t), n);
-}
-function Ja(t) {
-  const e = typeof (t == null ? void 0 : t.email) == "string" ? t.email.trim() : "",
-    n = typeof (t == null ? void 0 : t.token) == "string" ? t.token.trim() : "";
-  return !e || !n ? null : { email: e, token: n };
-}
-function Za(t = {}) {
-  var e, n, a, r, o, l, w;
-  const I = (e = t.loginUrl) != null ? e : Xt,
-    S = (n = t.allowedAuthOrigins) != null ? n : Ua,
-    A = (a = t.authSource) != null ? a : xa,
-    b = (r = t.authCallbackType) != null ? r : Ca,
-    h = (o = t.defaultRoute) != null ? o : zt,
-    i = (l = t.windowRoot) != null ? l : "app.html",
-    f = (w = t.cacheNamespaceReady) != null ? w : Promise.resolve();
-  let u = null,
-    y = null,
-    c = null,
-    m,
-    s = null;
-  const p = (d, g) => {
-      if (!s) return !1;
-      try {
-        return (s.port.postMessage({ scope: x, type: d, payload: g }), !0);
-      } catch (E) {
-        return ((s = null), !1);
-      }
-    },
-    T = async (d, g) => {
-      if (p(d, g)) return (await ut(s == null ? void 0 : s.windowId), !0);
-      const E = await Ya();
-      return (E != null && E.tabId && (await ut(E.windowId)), !1);
-    },
-    D = async () => {
-      await ae(It, i, h);
-    },
-    W = async (d) => {
-      const g = K,
-        E = d.status === "success" && !Va(d.memberType) && !Ve(m);
-      ((m = void 0),
-        (K = null),
-        await ne(),
-        (y = null),
-        (u = null),
-        (c = null),
-        await za(g == null ? void 0 : g.contentTab, d),
-        E && ((d.next = It), await ee(It), (y = It), (u = d), await D()));
-    },
-    L = async (d) => {
-      var g, E;
-      if (((m = void 0), (c = null), d.status !== "success")) {
-        (await ne(),
-          (y = null),
-          (u = null),
-          (c = d),
-          (await T(Le, d)) ? (c = null) : await ae(h, i, h),
-          (K = null));
-        return;
-      }
-      if ((await ee(d.next), (y = (g = d.next) != null ? g : h), await T(Zt, d))) {
-        ((u = null), (K = null));
-        return;
-      }
-      (await ae((E = d.next) != null ? E : h, i, h),
-        (u = d),
-        (await T(Zt, d)) && ((u = null), (K = null)));
-    },
-    xt = async (d, g) => {
-      var E, P;
-      if (!S.some((N) => g.startsWith(N))) return { ok: !1 };
-      if (d.source !== A || d.type !== b) return { ok: !1 };
-      await f;
-      const C = typeof d.status == "string" ? d.status.toLowerCase() : "success",
-        O = C === "success" ? "success" : C === "error" ? "error" : "cancel",
-        F = $((E = await We()) != null ? E : Fa(d, h), h),
-        _ =
-          (P = K == null ? void 0 : K.entry) != null
-            ? P
-            : Fe(H(d.payload) ? d.payload.entry : void 0),
-        k = {
-          status: O,
-          payload: {
-            ...(H(d.payload) ? d.payload : {}),
-            ...(Ve(m) ? { checkoutIntent: m == null ? void 0 : m.checkoutIntent } : {}),
-          },
-          next: F,
-          entry: _,
-          raw: d,
-        };
-      if (O !== "success")
-        return (
-          (k.message = C === "error" ? "Authorization failed." : "Authorization was not approved."),
-          _ === "content" ? await W(k) : await L(k),
-          { ok: !0 }
-        );
-      const yt = Ja(k.payload);
-      if (!yt)
-        return (
-          (k.status = "error"),
-          (k.message = "Authorization response is missing credentials."),
-          _ === "content" ? await W(k) : await L(k),
-          { ok: !0 }
-        );
-      try {
-        const N = await Ue(await oa({ ...yt, channel: st().short_name || "" }));
-        (tt(N),
-          (k.memberType = N.userState.memberType),
-          (k.next = qa({ memberType: k.memberType, payload: m, fallback: F })),
-          (k.message = "Signed in successfully."));
-      } catch (N) {
-        ((k.status = "error"), (k.message = "Failed to save user info. Please try again."));
-      }
-      return (_ === "content" ? await W(k) : await L(k), { ok: !0 });
-    },
-    En = (d, g) => {
-      var E, P, C, O, F;
-      if (Ne(d)) {
-        if (d.type === Jt)
-          return (
-            (m = H(d.payload) ? d.payload : void 0),
-            (async () => {
-              var _, k;
-              (await f,
-                await qe(m, {
-                  loginUrl: I,
-                  defaultRoute: h,
-                  senderTabId: (_ = g.tab) == null ? void 0 : _.id,
-                  senderWindowId: (k = g.tab) == null ? void 0 : k.windowId,
-                }));
-            })().catch(() => {}),
-            { scope: x, type: Jt }
-          );
-        if (d.type === Ce) {
-          if (
-            (((E = g.tab) == null ? void 0 : E.id) != null &&
-              et({ windowId: g.tab.windowId, tabId: g.tab.id }),
-            u)
-          ) {
-            const _ = { scope: x, type: Zt, payload: u };
-            return ((u = null), _);
-          } else if (c) {
-            const _ = { scope: x, type: Le, payload: c };
-            return ((c = null), _);
-          }
-          return { scope: x, type: te };
-        }
-        if (d.type === Pe)
-          return (async () => {
-            await f;
-            const _ = (await We()) || y;
-            return _ ? { scope: x, type: La, payload: { next: $(_, h) } } : { scope: x, type: te };
-          })();
-        if (d.type === Oe) {
-          const _ = $(H(d.payload) ? d.payload.next : void 0, h);
-          return ($a(y, _) && ((y = null), ne()), { scope: x, type: te });
-        }
-        if (d.type === ct) {
-          const _ = H(d.payload) ? d.payload : {},
-            k = H(_.message) ? _.message : null,
-            yt =
-              typeof _.senderUrl == "string"
-                ? _.senderUrl
-                : typeof _.origin == "string"
-                  ? _.origin
-                  : (F =
-                        (O = (P = g.url) != null ? P : g.origin) != null
-                          ? O
-                          : (C = g.tab) == null
-                            ? void 0
-                            : C.url) != null
-                    ? F
-                    : "";
-          return k
-            ? xt(k, yt)
-                .then((N) => ({ scope: x, type: ct, ...N }))
-                .catch((N) => ({
-                  scope: x,
-                  type: ct,
-                  ok: !1,
-                  error: N instanceof Error ? N.message : String(N),
-                }))
-            : { scope: x, type: ct, ok: !1 };
-        }
-      }
-    },
-    Rn = (d, g) => {
-      var E, P, C, O;
-      const F =
-        (O =
-          (C = (E = g.url) != null ? E : g.origin) != null
-            ? C
-            : (P = g.tab) == null
-              ? void 0
-              : P.url) != null
-          ? O
-          : "";
-      He(d, A, b) && xt(d, F).catch(() => {});
-    };
-  return {
-    internalMessageRoute: {
-      name: "web-auth",
-      canHandle: (d) => Ne(d),
-      handle: (d, g) => En(d, g.sender),
-    },
-    externalMessageRoute: {
-      name: "web-auth-external",
-      canHandle: (d, g) => {
-        var E, P, C, O;
-        const F =
-          (O =
-            (C = (E = g.sender.url) != null ? E : g.sender.origin) != null
-              ? C
-              : (P = g.sender.tab) == null
-                ? void 0
-                : P.url) != null
-            ? O
-            : "";
-        return He(d, A, b) && S.some((_) => F.startsWith(_));
-      },
-      handle: (d, g) => Rn(d, g.sender),
-    },
-    appWindowPortRoute: {
-      name: "web-auth-app-window",
-      portName: Da,
-      handle: (d) => {
-        const g = ja(d);
-        ((s = { ...g, port: d }),
-          et(g),
-          d.onDisconnect.addListener(() => {
-            (s == null ? void 0 : s.port) === d && (s = null);
-          }));
-      },
-    },
-    dispose() {
-      ((u = null), (y = null), (c = null), (m = void 0), (s = null));
-    },
-  };
-}
-var tr = "https://hlsdownloader.com/",
-  er = 1500,
+var er = 1500,
   re = "app.html#/",
   nr = 1920,
   ar = 1080,
@@ -940,9 +440,6 @@ function Ye() {
   var t;
   return (t = st().browser_specific_settings) != null && t.gecko ? "popup" : "panel";
 }
-async function or() {
-  await St(tr);
-}
 async function St(t, e = {}) {
   var n;
   const a = ur(t),
@@ -964,12 +461,6 @@ async function St(t, e = {}) {
   }
   const o = await qt({ url: a, active: r });
   r && typeof o.windowId == "number" && (await Q(o.windowId, { focused: !0 }).catch(() => {}));
-}
-async function sr(t) {
-  // Membership tiers removed: never open the subscribe page from content prompts.
-}
-async function ir() {
-  await Qe("/subscription-manage");
 }
 async function Qe(t) {
   const e = V(re),
@@ -1617,16 +1108,6 @@ function dn(t) {
     return t;
   }
 }
-function Fr(t) {
-  return t === "PRO" || t === "MAX";
-}
-async function Vr() {
-  // Membership tiers removed: no daily subscribe prompt.
-  return !1;
-}
-async function qr() {
-  await gt(M.dailyPrompt, ue(Date.now())).catch(() => {});
-}
 function fn(t) {
   var e;
   return t.updateAction === "reload"
@@ -1685,13 +1166,6 @@ async function jr(t, e) {
     return !1;
   }
 }
-async function Br(t) {
-  try {
-    return (await $t(t, { command: Lr }), !0);
-  } catch (e) {
-    return !1;
-  }
-}
 async function Kr(t, e, n) {
   var a;
   if (!Number.isFinite(t) || t <= 0 || !_t(e)) return;
@@ -1700,7 +1174,6 @@ async function Kr(t, e, n) {
     const o = Gr(r);
     if (o && (await jr(t, o))) return;
   }
-  (await Vr()) && (await Br(t)) && (await qr());
 }
 function le(t) {
   const e = lt.get(t);
@@ -2113,8 +1586,7 @@ function bo(t) {
         }
   });
 }
-var Io = "https://hlsdownloader.com/",
-  So = 3e4,
+var So = 3e4,
   Ao = 1440 * 60 * 1e3,
   _o = 3e3;
 function at(t) {
@@ -2287,31 +1759,8 @@ async function Lo() {
   if (!r) throw new Error("UPDATE_HOMEPAGE_UNAVAILABLE");
   (await de(n), await St(a), await St(r));
 }
-async function Po() {
-  var t;
-  let e;
-  try {
-    if (((e = (await qt({ url: Io, active: !1 })).id), typeof e != "number")) return;
-    const n =
-      (t = (
-        await _e({
-          target: { tabId: e },
-          func: () => ({
-            source: localStorage.getItem("utm_source") || "",
-            gclid: localStorage.getItem("gclid") || "",
-          }),
-        })
-      )[0]) == null
-        ? void 0
-        : t.result;
-    await na({ source: n == null ? void 0 : n.source, gclid: n == null ? void 0 : n.gclid });
-  } catch (n) {
-  } finally {
-    typeof e == "number" && (await Qn(e).catch(() => {}));
-  }
-}
 async function Oo() {
-  (await Po(), await Un());
+  await Un();
 }
 var No = la({
     persistent: !1,
@@ -2319,7 +1768,6 @@ var No = la({
     main: () => {
       Cn(Ze);
       const t = Wn().catch((s) => {}),
-        e = Za({ windowRoot: "app.html", cacheNamespaceReady: t }),
         n = Er(),
         a = zr({ getVersionGateSnapshot: wt }),
         r = Ma(),
@@ -2327,7 +1775,6 @@ var No = la({
         l = Ta(),
         w = co(),
         I = [
-          e.internalMessageRoute,
           Xr({ getVersionGateSnapshot: wt }),
           fo(),
           { name: "browser-storage", canHandle: (s) => wo(s), handle: (s) => yo(s) },
@@ -2367,13 +1814,9 @@ var No = la({
               R(
                 s,
                 v.navigation.openExternalUrl,
-                v.navigation.openHomeSite,
                 v.navigation.openApp,
-                v.navigation.openSubscription,
-                v.navigation.openSubscriptionManage,
               ),
             handle: (s, p) => {
-              var T;
               if (R(s, v.navigation.openExternalUrl)) {
                 const D = s.payload;
                 return St(at(D) && typeof D.url == "string" ? D.url : "", {
@@ -2383,19 +1826,10 @@ var No = la({
                   .then(() => ({ ok: !0 }))
                   .catch((W) => ({ ok: !1, error: U(W) }));
               }
-              if (R(s, v.navigation.openHomeSite)) {
-                or();
-                return;
-              }
               if (R(s, v.navigation.openApp)) {
                 Tt();
                 return;
               }
-              if (R(s, v.navigation.openSubscriptionManage)) {
-                ir();
-                return;
-              }
-              sr((T = p.sender.tab) == null ? void 0 : T.id);
             },
           },
           {
@@ -2480,8 +1914,8 @@ var No = la({
               })),
           },
         ],
-        S = [e.externalMessageRoute],
-        A = [l.portRoute, e.appWindowPortRoute, { name: "proxy-fetch", portName: hr, handle: yr }],
+        S = [],
+        A = [l.portRoute, { name: "proxy-fetch", portName: hr, handle: yr }],
         b = go(I),
         h = bo(S),
         i = vo(A),
