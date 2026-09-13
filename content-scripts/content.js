@@ -7680,6 +7680,7 @@ var J3 = Object.defineProperty,
         isSortByDate: typeof t.isSortByDate == "boolean" ? t.isSortByDate : Co.isSortByDate,
         minFileSize: OD(t.minFileSize, Co.minFileSize),
         showDRMGuide: typeof t.showDRMGuide == "boolean" ? t.showDRMGuide : Co.showDRMGuide,
+        saveMetadata: typeof t.saveMetadata == "boolean" ? t.saveMetadata : Co.saveMetadata,
         outputStorageMode: tv(t.outputStorageMode),
         outputProfileV2: ji(t.outputProfileV2),
       };
@@ -7692,6 +7693,7 @@ var J3 = Object.defineProperty,
             isSortByDate: !1,
             minFileSize: 0,
             showDRMGuide: !1,
+            saveMetadata: !0,
             outputStorageMode: fi(),
             outputProfileV2: Pc(),
           }));
@@ -41437,6 +41439,181 @@ Check the discardedTracks field for more info.`);
           message: t.errorMessage || "Unknown task error.",
         }));
     }
+
+    function ofdlStripHtml(e) {
+      return String(e || "")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .trim();
+    }
+    function ofdlRelativePath(e, t) {
+      const r = e.split("/").filter(Boolean),
+        n = t.split("/").filter(Boolean);
+      let i = 0;
+      for (; i < r.length && i < n.length && r[i] === n[i]; ) i += 1;
+      return [...Array(r.length - i).fill(".."), ...n.slice(i)].join("/");
+    }
+    async function ofdlReadJson(e, t) {
+      try {
+        const r = t.split("/").filter(Boolean),
+          n = r.pop();
+        let i = e;
+        for (const a of r) i = await i.getDirectoryHandle(a, { create: !1 });
+        const s = await (await i.getFileHandle(n, { create: !1 })).getFile(),
+          o = JSON.parse(await s.text());
+        return o && typeof o == "object" ? o : null;
+      } catch (r) {
+        return null;
+      }
+    }
+    function ofdlBuildMetadataDoc(e, t, r, n) {
+      var i, a, s, o;
+      const l = new Date().toISOString(),
+        c = e.author || e.fromUser || {},
+        u = new Map();
+      for (const h of Array.isArray(n == null ? void 0 : n.media) ? n.media : [])
+        h && h.id != null && u.set(String(h.id), h);
+      for (const h of r) {
+        const f = String(h.id),
+          p = u.get(f);
+        p && p.path && !h.path ? u.set(f, { ...p, ...h, path: p.path }) : u.set(f, { ...(p || {}), ...h });
+      }
+      for (const h of e.mediaIds || [])
+        if (!u.has(String(h)) || (u.get(String(h)) || {}).status === "not_downloaded") {
+          const f = (e.mediaInfo || []).find((p) => String(p.id) === String(h)) || null,
+            d0 = (e.dropped && e.dropped[String(h)]) || null,
+            p = d0
+              ? d0.stage
+              : f
+                ? f.canView === !1
+                  ? "locked"
+                  : f.isReady === !1
+                    ? "not_ready"
+                    : f.hasSource
+                      ? "filtered_or_rejected"
+                      : "no_source_url"
+                : "unknown";
+          u.set(String(h), {
+            id: h,
+            type: f ? f.type : null,
+            status: "not_downloaded",
+            reason: p,
+            ...(d0 && d0.duplicateOfPost ? { duplicateOfPost: d0.duplicateOfPost } : {}),
+            ...(f ? { canView: f.canView, hasSource: f.hasSource, hasPreview: f.hasPreview, isDrm: f.isDrm } : {}),
+          });
+        }
+      const d = e.postedAt || e.createdAt || t.dateString || null;
+      return {
+        schemaVersion: 1,
+        site: "onlyfans",
+        type: String(t.responseType || "post"),
+        id: String(e.id),
+        creator: {
+          id: (i = c.id) != null ? i : null,
+          username: t.username || c.username || null,
+          name: (a = c.name) != null ? a : null,
+        },
+        postedAt: d,
+        text: typeof e.rawText == "string" ? e.rawText : ofdlStripHtml(e.text),
+        html: typeof e.text == "string" ? e.text : null,
+        price: (s = e.price) != null ? s : null,
+        isFree: typeof e.isFree == "boolean" ? e.isFree : null,
+        isOpened: typeof e.isOpened == "boolean" ? e.isOpened : null,
+        canPurchase: typeof e.canPurchase == "boolean" ? e.canPurchase : null,
+        isArchived: typeof e.isArchived == "boolean" ? e.isArchived : null,
+        isPinned: typeof e.isPinned == "boolean" ? e.isPinned : null,
+        likesCount: typeof e.likesCount == "number" ? e.likesCount : null,
+        commentsCount: typeof e.commentsCount == "number" ? e.commentsCount : null,
+        favoritesCount: typeof e.favoritesCount == "number" ? e.favoritesCount : null,
+        tipsAmount: (o = e.tipsAmount) != null ? o : null,
+        mediaCount: typeof e.mediaCount == "number" ? e.mediaCount : (e.mediaIds || []).length,
+        media: Array.from(u.values()),
+        raw: e,
+        savedAt: (n == null ? void 0 : n.savedAt) || l,
+        updatedAt: l,
+      };
+    }
+    var ofdlMetaCache = new Map(),
+      ofdlMetaLocks = new Map();
+    function ofdlWithMetaLock(e, t) {
+      const r = ofdlMetaLocks.get(e) || Promise.resolve(),
+        n = r.then(t, t);
+      return (ofdlMetaLocks.set(e, n.catch(() => {})), n);
+    }
+    async function ofdlWritePostMetadata(e, t, r, n) {
+      const i = (g) => {
+          n && typeof n.onLog == "function" && n.onLog(`[metadata] ${g}`);
+        },
+        a = new Map();
+      for (const g of e.tasks || []) {
+        const y = g.task,
+          w = y && y.post;
+        if (!w || typeof w != "object" || w.id == null) continue;
+        const b = `${y.responseType || "post"}:${String(w.id)}`;
+        a.has(b) || a.set(b, { post: w, task: y, records: [] });
+        a.get(b).records.push(g);
+      }
+      if (!a.size) return;
+      const s = t.kind === "filesystem" && !!t.directoryHandle,
+        o = s ? "" : "OFDownloader/";
+      let l = 0;
+      for (const [g, y] of a) {
+        if (r.signal && r.signal.aborted) return;
+        try {
+          const w = qn(String(y.task.username || "user_unknown")) || "user_unknown",
+            b = qn(String(y.task.responseType || "post").toLowerCase()) || "post",
+            k = `${o}${w}/metadata/${b}`,
+            x = `${k}/${qn(String(y.post.id))}.json`,
+            S = y.records.map((C) => {
+              const P = C.task,
+                R = C.phase === "completed" || C.phase === "skipped_existing",
+                M = {
+                  id: P.mid,
+                  type: P.mediaType,
+                  status: C.phase,
+                  width: typeof P.width == "number" ? P.width : null,
+                  height: typeof P.height == "number" ? P.height : null,
+                  duration: typeof P.duration == "number" ? P.duration : null,
+                };
+              return (
+                R && C.filename && (M.path = ofdlRelativePath(k, C.filename)),
+                C.errorCode && (M.errorCode = C.errorCode),
+                M
+              );
+            }),
+            I = await ofdlWithMetaLock(x, async () => {
+              const T = ofdlMetaCache.get(x) || (s ? await ofdlReadJson(t.directoryHandle, x) : null),
+                D = ofdlBuildMetadataDoc(y.post, y.task, S, T),
+                N = JSON.stringify(D, null, 2);
+              if (s) {
+                const { parent: C, basename: P } = await xR(t.directoryHandle, x),
+                  R = await (await C.getFileHandle(P, { create: !0 })).createWritable();
+                (await R.write(N), await R.close());
+              } else {
+                const C = URL.createObjectURL(new Blob([N], { type: "application/json" }));
+                try {
+                  const P = await Uv({ url: C, filename: x, conflictAction: "overwrite", saveAs: !1 });
+                  typeof P == "number" && (await IR(P));
+                } finally {
+                  URL.revokeObjectURL(C);
+                }
+              }
+              return (ofdlMetaCache.set(x, D), N);
+            });
+          (l += 1, i(`wrote ${x} (${S.length} media)`));
+        } catch (w) {
+          i(`failed for ${g}: ${w instanceof Error ? w.message : String(w)}`);
+        }
+      }
+      i(`${l}/${a.size} metadata file(s) written`);
+    }
     async function _F(e, t = {}) {
       var r, n, i, a, s;
       const o = e.requestId || yF(e.source),
@@ -41541,6 +41718,12 @@ Check the discardedTracks field for more info.`);
           }),
           w = await g.run(m.jobId),
           v = EF(w);
+        (!e.settings || e.settings.saveMetadata !== !1) &&
+          (await ofdlWritePostMetadata(w, p, e, t).catch((x) => {
+            var D;
+            (D = t.onLog) == null ||
+              D.call(t, `[metadata] failed: ${x instanceof Error ? x.message : String(x)}`);
+          }));
         w.summary.completed > 0 && p.kind === "filesystem" && (await rD(e.directoryBindingId));
         const T = p.kind === "filesystem" && v.some((x) => kF(x.message)),
           A = p.kind === "filesystem" && v.some(TF);

@@ -1,4 +1,38 @@
 var mainWorld = (function () {
+
+  function ofdlPostMeta(e) {
+    if (!e || typeof e != "object") return;
+    const pick = (u) =>
+      u && typeof u == "object" ? { id: u.id, username: u.username, name: u.name } : void 0;
+    const out = {};
+    for (const [k, v] of Object.entries(e))
+      (v == null || typeof v == "string" || typeof v == "number" || typeof v == "boolean") &&
+        (out[k] = v);
+    out.mediaIds = Array.isArray(e.media)
+      ? e.media.map((m) => m && m.id).filter((m) => m != null)
+      : [];
+    out.mediaInfo = Array.isArray(e.media)
+      ? e.media
+          .filter((m) => m && m.id != null)
+          .map((m) => {
+            var f = m.files || {},
+              d = f.drm || {},
+              g = d.manifest || {};
+            return {
+              id: m.id,
+              type: m.type || null,
+              canView: m.canView !== !1,
+              hasSource: !!((f.full && f.full.url) || g.dash || g.hls),
+              hasPreview: !!((f.preview && f.preview.url) || (f.thumb && f.thumb.url)),
+              isDrm: !!(g.dash || g.hls),
+              isReady: typeof m.isReady == "boolean" ? m.isReady : null,
+            };
+          })
+      : [];
+    e.author && (out.author = pick(e.author));
+    e.fromUser && (out.fromUser = pick(e.fromUser));
+    return out;
+  }
   function Ne(C) {
     return C == null || typeof C == "function" ? { main: C } : C;
   }
@@ -1076,6 +1110,8 @@ var mainWorld = (function () {
             text: L,
           });
         }
+        const ofdlMeta = ofdlPostMeta(e);
+        for (const v of b) v.post = ofdlMeta;
         return b.filter(
           (v) =>
             v.id !== void 0 &&
@@ -1231,12 +1267,52 @@ var mainWorld = (function () {
             void 0,
         );
       },
+      Vt = (e) => {
+        var t, n, o;
+        if (!e || typeof e != "object") return "";
+        const s = (o = (n = (t = e.postId) != null ? t : e.entityId) != null ? n : e.id) != null ? o : e.uniqueId;
+        return s == null ? "" : String(s);
+      },
       kt = () => {
-        const e = xt(),
-          t = Et();
-        if (t < 0 || t >= e.length) return [];
-        const n = St(e[t], De());
-        return n ? [n] : [];
+        var e, t;
+        const n = xt(),
+          o = Et();
+        if (o < 0 || o >= n.length) return [];
+        const s = De(),
+          r = n[o],
+          a = Vt(r),
+          p = a ? n.filter((h) => Vt(h) === a) : [r],
+          i = p.filter((h) => h && typeof h == "object" && h.media && typeof h.media == "object"),
+          u = [];
+        if (i.length > 0) {
+          const h = i[0];
+          u.push(
+            ...F(
+              {
+                id: a || crypto.randomUUID(),
+                responseType: typeof h.entityType == "string" ? h.entityType : "post",
+                dateString: typeof h.createdAt == "string" ? h.createdAt : new Date().toISOString(),
+                createdAt: typeof h.createdAt == "string" ? h.createdAt : void 0,
+                generatedAt: Date.now(),
+                text: ve,
+                media: i.map((g) => g.media),
+              },
+              s,
+            ),
+          );
+        }
+        for (const h of p) {
+          if (h && typeof h == "object" && h.media && typeof h.media == "object") continue;
+          const g = St(h, s);
+          g && u.push(g);
+        }
+        const l = new Set(),
+          y = [];
+        for (const h of u) {
+          const g = String((t = (e = h.mid) != null ? e : h.url) != null ? t : "");
+          l.has(g) || (l.add(g), y.push(h));
+        }
+        return y;
       },
       Pe = (e, t) => {
         const n = typeof e == "string" ? e.trim() : "";

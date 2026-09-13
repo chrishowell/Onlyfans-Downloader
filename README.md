@@ -71,6 +71,22 @@ Onlyfans Downloader is the latest innovative tool designed for efficient and eas
 🟢 This is a Google Chrome extension that adds download buttons to fansly feed and image gallerys. It can download images, animated images (gifs), audio and videos. 
 🔴 I don't know if downloading for private use is allowed, so use it at your own responsibility. But obviously you are not allowed to reproduce, publish, or distribute any content downloaded. Please do not do this.
 
+## 🗂️ Post metadata
+
+Every download also writes one JSON file per post, message or story, kept apart from the media:
+
+```
+<output root>/
+  twunkjesus/photo/...jpg
+  twunkjesus/video/...mp4
+  twunkjesus/metadata/post/123456.json
+  twunkjesus/metadata/message/789.json
+```
+
+Each file holds the post text, date, price, like and comment counts, the creator, the raw scalar fields from the OnlyFans API, and a `media` list. Each media entry carries a `path` relative to the JSON file (for example `../../photo/xxx.jpg`), its type, dimensions and download status. Media that belong to the post but were not downloaded are listed with `"status": "not_downloaded"`. Re-running a download merges into the existing file rather than replacing it.
+
+Turn it off with the **Save Post Metadata** switch on the Settings page. In browser storage mode the files land under `OFDownloader/` in your Downloads folder, next to the media.
+
 ## 🚀 Installation
 
 ### Manual Installation

@@ -70431,6 +70431,7 @@ usage: app.provide(ZINDEX_INJECTION_KEY, { current: 0 })`,
     isSortByDate: !1,
     minFileSize: 0,
     showDRMGuide: !1,
+    saveMetadata: !0,
     outputStorageMode: Rh(),
     outputProfileV2: Bd(),
   };
@@ -70446,6 +70447,7 @@ usage: app.provide(ZINDEX_INJECTION_KEY, { current: 0 })`,
       isSortByDate: typeof t.isSortByDate == "boolean" ? t.isSortByDate : Dh.isSortByDate,
       minFileSize: F1e(t.minFileSize, Dh.minFileSize),
       showDRMGuide: typeof t.showDRMGuide == "boolean" ? t.showDRMGuide : Dh.showDRMGuide,
+      saveMetadata: typeof t.saveMetadata == "boolean" ? t.saveMetadata : Dh.saveMetadata,
       outputStorageMode: qN(t.outputStorageMode),
       outputProfileV2: Ih(t.outputProfileV2),
     };
@@ -70458,6 +70460,7 @@ usage: app.provide(ZINDEX_INJECTION_KEY, { current: 0 })`,
     ((e.isSortByDate = n.isSortByDate),
       (e.minFileSize = n.minFileSize),
       (e.showDRMGuide = n.showDRMGuide),
+      (e.saveMetadata = n.saveMetadata),
       (e.outputStorageMode = n.outputStorageMode),
       (e.outputProfileV2 = n.outputProfileV2));
   }
@@ -102038,6 +102041,215 @@ Check the discardedTracks field for more info.`);
         message: t.errorMessage || "Unknown task error.",
       }));
   }
+
+  function ofdlPostMeta(e) {
+    if (!e || typeof e != "object") return;
+    const pick = (u) =>
+      u && typeof u == "object" ? { id: u.id, username: u.username, name: u.name } : void 0;
+    const out = {};
+    for (const [k, v] of Object.entries(e))
+      (v == null || typeof v == "string" || typeof v == "number" || typeof v == "boolean") &&
+        (out[k] = v);
+    out.mediaIds = Array.isArray(e.media)
+      ? e.media.map((m) => m && m.id).filter((m) => m != null)
+      : [];
+    out.mediaInfo = Array.isArray(e.media)
+      ? e.media
+          .filter((m) => m && m.id != null)
+          .map((m) => {
+            var f = m.files || {},
+              d = f.drm || {},
+              g = d.manifest || {};
+            return {
+              id: m.id,
+              type: m.type || null,
+              canView: m.canView !== !1,
+              hasSource: !!((f.full && f.full.url) || g.dash || g.hls),
+              hasPreview: !!((f.preview && f.preview.url) || (f.thumb && f.thumb.url)),
+              isDrm: !!(g.dash || g.hls),
+              isReady: typeof m.isReady == "boolean" ? m.isReady : null,
+            };
+          })
+      : [];
+    e.author && (out.author = pick(e.author));
+    e.fromUser && (out.fromUser = pick(e.fromUser));
+    return out;
+  }
+
+  function ofdlStripHtml(e) {
+    return String(e || "")
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n")
+      .replace(/<[^>]+>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+  }
+  function ofdlRelativePath(e, t) {
+    const r = e.split("/").filter(Boolean),
+      n = t.split("/").filter(Boolean);
+    let i = 0;
+    for (; i < r.length && i < n.length && r[i] === n[i]; ) i += 1;
+    return [...Array(r.length - i).fill(".."), ...n.slice(i)].join("/");
+  }
+  async function ofdlReadJson(e, t) {
+    try {
+      const r = t.split("/").filter(Boolean),
+        n = r.pop();
+      let i = e;
+      for (const a of r) i = await i.getDirectoryHandle(a, { create: !1 });
+      const s = await (await i.getFileHandle(n, { create: !1 })).getFile(),
+        o = JSON.parse(await s.text());
+      return o && typeof o == "object" ? o : null;
+    } catch (r) {
+      return null;
+    }
+  }
+  function ofdlBuildMetadataDoc(e, t, r, n) {
+    var i, a, s, o;
+    const l = new Date().toISOString(),
+      c = e.author || e.fromUser || {},
+      u = new Map();
+    for (const h of Array.isArray(n == null ? void 0 : n.media) ? n.media : [])
+      h && h.id != null && u.set(String(h.id), h);
+    for (const h of r) {
+      const f = String(h.id),
+        p = u.get(f);
+      p && p.path && !h.path ? u.set(f, { ...p, ...h, path: p.path }) : u.set(f, { ...(p || {}), ...h });
+    }
+    for (const h of e.mediaIds || [])
+      if (!u.has(String(h)) || (u.get(String(h)) || {}).status === "not_downloaded") {
+        const f = (e.mediaInfo || []).find((p) => String(p.id) === String(h)) || null,
+          d0 = (e.dropped && e.dropped[String(h)]) || null,
+          p = d0
+            ? d0.stage
+            : f
+              ? f.canView === !1
+                ? "locked"
+                : f.isReady === !1
+                  ? "not_ready"
+                  : f.hasSource
+                    ? "filtered_or_rejected"
+                    : "no_source_url"
+              : "unknown";
+        u.set(String(h), {
+          id: h,
+          type: f ? f.type : null,
+          status: "not_downloaded",
+          reason: p,
+          ...(d0 && d0.duplicateOfPost ? { duplicateOfPost: d0.duplicateOfPost } : {}),
+          ...(f ? { canView: f.canView, hasSource: f.hasSource, hasPreview: f.hasPreview, isDrm: f.isDrm } : {}),
+        });
+      }
+    const d = e.postedAt || e.createdAt || t.dateString || null;
+    return {
+      schemaVersion: 1,
+      site: "onlyfans",
+      type: String(t.responseType || "post"),
+      id: String(e.id),
+      creator: {
+        id: (i = c.id) != null ? i : null,
+        username: t.username || c.username || null,
+        name: (a = c.name) != null ? a : null,
+      },
+      postedAt: d,
+      text: typeof e.rawText == "string" ? e.rawText : ofdlStripHtml(e.text),
+      html: typeof e.text == "string" ? e.text : null,
+      price: (s = e.price) != null ? s : null,
+      isFree: typeof e.isFree == "boolean" ? e.isFree : null,
+      isOpened: typeof e.isOpened == "boolean" ? e.isOpened : null,
+      canPurchase: typeof e.canPurchase == "boolean" ? e.canPurchase : null,
+      isArchived: typeof e.isArchived == "boolean" ? e.isArchived : null,
+      isPinned: typeof e.isPinned == "boolean" ? e.isPinned : null,
+      likesCount: typeof e.likesCount == "number" ? e.likesCount : null,
+      commentsCount: typeof e.commentsCount == "number" ? e.commentsCount : null,
+      favoritesCount: typeof e.favoritesCount == "number" ? e.favoritesCount : null,
+      tipsAmount: (o = e.tipsAmount) != null ? o : null,
+      mediaCount: typeof e.mediaCount == "number" ? e.mediaCount : (e.mediaIds || []).length,
+      media: Array.from(u.values()),
+      raw: e,
+      savedAt: (n == null ? void 0 : n.savedAt) || l,
+      updatedAt: l,
+    };
+  }
+  var ofdlMetaCache = new Map(),
+    ofdlMetaLocks = new Map();
+  function ofdlWithMetaLock(e, t) {
+    const r = ofdlMetaLocks.get(e) || Promise.resolve(),
+      n = r.then(t, t);
+    return (ofdlMetaLocks.set(e, n.catch(() => {})), n);
+  }
+  async function ofdlWritePostMetadata(e, t, r, n) {
+    const i = (g) => {
+        n && typeof n.onLog == "function" && n.onLog(`[metadata] ${g}`);
+      },
+      a = new Map();
+    for (const g of e.tasks || []) {
+      const y = g.task,
+        w = y && y.post;
+      if (!w || typeof w != "object" || w.id == null) continue;
+      const b = `${y.responseType || "post"}:${String(w.id)}`;
+      a.has(b) || a.set(b, { post: w, task: y, records: [] });
+      a.get(b).records.push(g);
+    }
+    if (!a.size) return;
+    const s = t.kind === "filesystem" && !!t.directoryHandle,
+      o = s ? "" : "OFDownloader/";
+    let l = 0;
+    for (const [g, y] of a) {
+      if (r.signal && r.signal.aborted) return;
+      try {
+        const w = js(String(y.task.username || "user_unknown")) || "user_unknown",
+          b = js(String(y.task.responseType || "post").toLowerCase()) || "post",
+          k = `${o}${w}/metadata/${b}`,
+          x = `${k}/${js(String(y.post.id))}.json`,
+          S = y.records.map((C) => {
+            const P = C.task,
+              R = C.phase === "completed" || C.phase === "skipped_existing",
+              M = {
+                id: P.mid,
+                type: P.mediaType,
+                status: C.phase,
+                width: typeof P.width == "number" ? P.width : null,
+                height: typeof P.height == "number" ? P.height : null,
+                duration: typeof P.duration == "number" ? P.duration : null,
+              };
+            return (
+              R && C.filename && (M.path = ofdlRelativePath(k, C.filename)),
+              C.errorCode && (M.errorCode = C.errorCode),
+              M
+            );
+          }),
+          I = await ofdlWithMetaLock(x, async () => {
+            const T = ofdlMetaCache.get(x) || (s ? await ofdlReadJson(t.directoryHandle, x) : null),
+              D = ofdlBuildMetadataDoc(y.post, y.task, S, T),
+              N = JSON.stringify(D, null, 2);
+            if (s) {
+              const { parent: C, basename: P } = await pke(t.directoryHandle, x),
+                R = await (await C.getFileHandle(P, { create: !0 })).createWritable();
+              (await R.write(N), await R.close());
+            } else {
+              const C = URL.createObjectURL(new Blob([N], { type: "application/json" }));
+              try {
+                const P = await a$({ url: C, filename: x, conflictAction: "overwrite", saveAs: !1 });
+                typeof P == "number" && (await mke(P));
+              } finally {
+                URL.revokeObjectURL(C);
+              }
+            }
+            return (ofdlMetaCache.set(x, D), N);
+          });
+        (l += 1, i(`wrote ${x} (${S.length} media)`));
+      } catch (w) {
+        i(`failed for ${g}: ${w instanceof Error ? w.message : String(w)}`);
+      }
+    }
+    i(`${l}/${a.size} metadata file(s) written`);
+  }
   async function BAe(e, t = {}) {
     var n, r, a, o, i;
     const s = e.requestId || _Ae(e.source),
@@ -102140,6 +102352,12 @@ Check the discardedTracks field for more info.`);
         }),
         w = await v.run(y.jobId),
         b = OAe(w);
+      (!e.settings || e.settings.saveMetadata !== !1) &&
+        (await ofdlWritePostMetadata(w, m, e, t).catch((T) => {
+          var I;
+          (I = t.onLog) == null ||
+            I.call(t, `[metadata] failed: ${T instanceof Error ? T.message : String(T)}`);
+        }));
       w.summary.completed > 0 && m.kind === "filesystem" && (await Hj(e.directoryBindingId));
       const k = m.kind === "filesystem" && b.some((T) => RAe(T.message)),
         x = m.kind === "filesystem" && b.some(DAe);
@@ -102836,6 +103054,7 @@ Check the discardedTracks field for more info.`);
           signature: b,
           variants: T.variants,
           selectedVariant: I,
+          post: ofdlPostMeta(u),
         }
       : null;
   }
@@ -103050,6 +103269,7 @@ Check the discardedTracks field for more info.`);
       thumbnailUrl: e.thumb || void 0,
       variants: e.variants,
       selectedVariant: e.selectedVariant,
+      post: e.post,
     };
   }
   function bIe(e) {
@@ -103188,6 +103408,45 @@ Check the discardedTracks field for more info.`);
       { list: o.filter((i) => !!i), fileSizeSkipped: a }
     );
   }
+  function ofdlDropStage(o, t) {
+    return t.mediaType !== kc.ALL && o.mediaType !== t.mediaType
+      ? "media_type_filter"
+      : t.mediaSource === Ln.PURCHASED && t.responseType !== Sc.ALL && o.responseType !== t.responseType
+        ? "response_type_filter"
+        : "date_range_filter";
+  }
+  function ofdlAnnotateDrops(all, afterFilter, afterSize, tasks, t) {
+    const kept = new Set(afterSize.map((x) => String(x.id))),
+      filt = new Set(afterFilter.map((x) => String(x.id))),
+      drops = new Map();
+    for (const o of all) {
+      const id = String(o.id);
+      if (kept.has(id)) continue;
+      const pid = String(o.pid);
+      drops.has(pid) || drops.set(pid, {});
+      drops.get(pid)[id] = { stage: filt.has(id) ? "min_file_size" : ofdlDropStage(o, t) };
+    }
+    if (!drops.size) return;
+    for (const h of tasks) {
+      const p = h.post,
+        dd = p && drops.get(String(p.id));
+      dd && (p.dropped = { ...(p.dropped || {}), ...dd });
+    }
+  }
+  function ofdlAnnotateDuplicates(dropped, kept, queueItems, requestId) {
+    for (const O of dropped) {
+      const mid = String(O.mid),
+        prior =
+          kept.find((x) => String(x.mid) === mid) ||
+          (queueItems.find((A) => A.requestId === requestId && String(A.task.mid) === mid) || {}).task,
+        info = { stage: "duplicate_media_id" };
+      prior && prior.post && prior.post.id != null && (info.duplicateOfPost = String(prior.post.id));
+      for (const x of kept) {
+        const p = x.post;
+        p && O.post && String(p.id) === String(O.post.id) && (p.dropped = { ...(p.dropped || {}), [mid]: info });
+      }
+    }
+  }
   async function T6(e, t, n = {}) {
     var r;
     const a = n.onLog || GAe;
@@ -103214,6 +103473,7 @@ Check the discardedTracks field for more info.`);
           requestSlotController: n.requestSlotController,
         }),
         f = d.list.map((h) => C6(h, e));
+      ofdlAnnotateDrops(u.list || [], c.list, d.list, f, t);
       if (
         (s.push(...f),
         (l += 1),
@@ -104932,10 +105192,12 @@ Check the discardedTracks field for more info.`);
               )),
                 (d += Math.max(0, Number((_ == null ? void 0 : _.fileSizeSkipped) || 0))));
               const M = [];
+              const ofdlDup = [];
               for (const O of C) {
                 const R = FC(A.id, O);
-                v.has(R) || (v.add(R), M.push(O));
+                v.has(R) ? ofdlDup.push(O) : (v.add(R), M.push(O));
               }
+              ofdlDup.length && ofdlAnnotateDuplicates(ofdlDup, M, this.snapshot.queueItems, e);
               const L = VS(
                 M,
                 i,
@@ -111192,6 +111454,7 @@ Check the discardedTracks field for more info.`);
           g = U(!1),
           y = U("missing"),
           w = $S(),
+          saveMetadataEnabled = E(() => fo(t.$state).saveMetadata !== !1),
           b = E(() => fo(t.$state).outputStorageMode),
           k = E(() => {
             var Ce;
@@ -111203,6 +111466,10 @@ Check the discardedTracks field for more info.`);
           S = E(() => b.value === "directory_handle");
         function T() {
           m.value = !m.value;
+        }
+        function onSaveMetadataChange(Ce) {
+          const pe = fo(t.$state);
+          ((pe.saveMetadata = Ce === !0), t.setSetting(pe));
         }
         function I(Ce) {
           const pe = fo(t.$state);
@@ -111572,6 +111839,37 @@ Check the discardedTracks field for more info.`);
                             cOe,
                             " Super Large Video Mode is not supported by this browser. ",
                           )),
+                    ]),
+                    B("section", rOe, [
+                      B("div", aOe, [
+                        B("div", oOe, [
+                          B("div", { class: "of-direct-folder-setting__copy" }, [
+                            B(
+                              "h2",
+                              { class: "of-setting-title of-direct-folder-setting__title" },
+                              " Save Post Metadata ",
+                            ),
+                            B(
+                              "p",
+                              { class: "of-direct-folder-setting__description" },
+                              " Writes one JSON file per post or message to {creator}/metadata with relative links to the downloaded files ",
+                            ),
+                          ]),
+                          B("div", iOe, [
+                            J(
+                              Re,
+                              {
+                                "model-value": saveMetadataEnabled.value,
+                                "aria-label": "Save post metadata",
+                                onChange: onSaveMetadataChange,
+                              },
+                              null,
+                              8,
+                              ["model-value"],
+                            ),
+                          ]),
+                        ]),
+                      ]),
                     ]),
                     B("section", dOe, [
                       B(
